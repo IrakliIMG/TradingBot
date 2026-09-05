@@ -10,13 +10,24 @@ import threading
 import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-# === Render Health Check (ფონური ვებ-სერვერი Render-ისთვის) ===
+# === Render Health Check (უნივერსალური სერვერი) ===
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
         self.end_headers()
-        self.wfile.write(b"Bot is alive and running!")
+        self.wfile.write(b"OK")
 
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.end_headers()
+
+    def do_POST(self):
+        self.do_GET()
+
+    def log_message(self, format, *args):
+        return  # Render-ის ლოგების უსარგებლო პინგებით გადავსების პრევენცია
 def run_health_check_server():
     port = int(os.environ.get("PORT", 8080))
     server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
